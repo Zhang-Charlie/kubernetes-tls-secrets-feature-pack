@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright The WildFly Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>50</version>
+    </parent>
+
+    <groupId>org.wildfly.security.kubernetes.tls</groupId>
+    <artifactId>kubernetes-tls-secrets-parent</artifactId>
+    <version>1.0.0.Alpha1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>WildFly Kubernetes TLS Secrets Feature Pack -- Parent</name>
+    <description>Galleon feature pack skeleton with an empty tls-secrets subsystem.</description>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <required.java.build.version>[17,)</required.java.build.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <galleon.fork.embedded>true</galleon.fork.embedded>
+        <galleon.log.time>true</galleon.log.time>
+
+        <version.org.jboss.galleon>7.0.0.Final</version.org.jboss.galleon>
+        <version.org.wildfly.galleon-plugins>8.1.0.Final</version.org.wildfly.galleon-plugins>
+        <version.org.wildfly.licenses.plugin>2.4.2.Final</version.org.wildfly.licenses.plugin>
+        <version.org.apache.maven.plugins.maven-assembly-plugin>3.7.1</version.org.apache.maven.plugins.maven-assembly-plugin>
+
+        <version.org.wildfly>39.0.0.Final</version.org.wildfly>
+        <version.org.wildfly.common>1.6.0.Final</version.org.wildfly.common>
+        <version.org.wildfly.core>31.0.1.Final</version.org.wildfly.core>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-standard-ee-bom</artifactId>
+                <version>${version.org.wildfly}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>kubernetes-tls-secrets-galleon-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>kubernetes-tls-secrets-subsystem</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-ee-galleon-pack</artifactId>
+                <version>${version.org.wildfly}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-galleon-pack</artifactId>
+                <version>${version.org.wildfly}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.galleon-plugins</groupId>
+                <artifactId>wildfly-galleon-plugins</artifactId>
+                <version>${version.org.wildfly.galleon-plugins}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>subsystem</module>
+        <module>galleon-shared</module>
+        <module>feature-pack</module>
+        <module>galleon-local</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.wildfly.maven.plugins</groupId>
+                    <artifactId>licenses-plugin</artifactId>
+                    <version>${version.org.wildfly.licenses.plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.wildfly.galleon-plugins</groupId>
+                    <artifactId>wildfly-galleon-maven-plugin</artifactId>
+                    <version>${version.org.wildfly.galleon-plugins}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.wildfly.core</groupId>
+                            <artifactId>wildfly-embedded</artifactId>
+                            <version>${version.org.wildfly.core}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.wildfly.common</groupId>
+                            <artifactId>wildfly-common</artifactId>
+                            <version>${version.org.wildfly.common}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>https://repository.jboss.org/nexus/repository/public-jboss/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+</project>

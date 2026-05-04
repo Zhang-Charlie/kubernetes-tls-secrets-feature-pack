@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright The WildFly Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+<build xmlns="urn:wildfly:feature-pack-build:3.5" producer="org.wildfly.security.kubernetes.tls:kubernetes-tls-secrets-galleon-pack">
+    <stability-levels>
+        <minimum-stability-level>preview</minimum-stability-level>
+        <config-stability-level>preview</config-stability-level>
+        <package-stability-level>preview</package-stability-level>
+    </stability-levels>
+    <transitive>
+        <dependency group-id="org.wildfly" artifact-id="wildfly-ee-galleon-pack">
+            <name>org.wildfly:wildfly-ee-galleon-pack</name>
+            <packages inherit="false">
+                <exclude name="product.conf"/>
+            </packages>
+            <default-configs inherit="false"/>
+        </dependency>
+    </transitive>
+    <dependencies>
+        <dependency group-id="org.wildfly" artifact-id="wildfly-galleon-pack">
+            <name>org.wildfly:wildfly-galleon-pack</name>
+            <packages inherit="false">
+                <include name="docs.examples"/>
+            </packages>
+            <default-configs inherit="false"/>
+        </dependency>
+    </dependencies>
+    <default-packages>
+        <package name="modules.all"/>
+        <package name="docs"/>
+        <package name="docs.licenses.merge"/>
+    </default-packages>
+    <generate-feature-specs>
+        <extensions>
+            <standalone>
+                <extension>org.wildfly.extension.tls-secrets</extension>
+            </standalone>
+        </extensions>
+    </generate-feature-specs>
+</build>
