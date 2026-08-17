@@ -20,7 +20,7 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.version.Stability;
 
 /**
- * Empty {@code tls-secrets} subsystem extension (skeleton).
+ * {@code tls-secrets} subsystem extension.
  */
 public class TlsSecretsExtension implements Extension {
 
@@ -41,7 +41,7 @@ public class TlsSecretsExtension implements Extension {
     }
 
     static ResourceDescriptionResolver getResourceDescriptionResolver(final String... keyPrefix) {
-        return getResourceDescriptionResolver(true, keyPrefix);
+        return getResourceDescriptionResolver(false, keyPrefix);
     }
 
     static ResourceDescriptionResolver getResourceDescriptionResolver(final boolean useUnprefixedChildTypes, final String... keyPrefix) {
