@@ -43,6 +43,7 @@
         <version.org.wildfly>39.0.0.Final</version.org.wildfly>
         <version.org.wildfly.common>1.6.0.Final</version.org.wildfly.common>
         <version.org.wildfly.core>31.0.1.Final</version.org.wildfly.core>
+        <version.org.wildfly.elytron>2.10.0.CR1-SNAPSHOT</version.org.wildfly.elytron>
     </properties>
 
     <dependencyManagement>
@@ -63,6 +64,11 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>kubernetes-tls-secrets-subsystem</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-elytron-keystore</artifactId>
+                <version>${version.org.wildfly.elytron}</version>
             </dependency>
             <dependency>
                 <groupId>org.wildfly</groupId>
