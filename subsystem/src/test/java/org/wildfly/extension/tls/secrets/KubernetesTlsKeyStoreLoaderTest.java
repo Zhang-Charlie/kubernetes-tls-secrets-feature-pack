@@ -52,6 +52,21 @@ public class KubernetesTlsKeyStoreLoaderTest {
     }
 
     @Test
+    public void testLoadKubernetesProjectedSecretSymlinks() throws Exception {
+        KubernetesTlsTestMaterial material = createKubernetesTlsMaterial("ProjectedVolume");
+        Path secretDirectory = createDirectory("projected-volume");
+        Path versionDirectory = Files.createDirectory(secretDirectory.resolve("..2026_08_18_09_00_00"));
+        material.writeTo(versionDirectory);
+        Files.createSymbolicLink(secretDirectory.resolve("..data"), versionDirectory.getFileName());
+        Files.createSymbolicLink(secretDirectory.resolve("tls.crt"), Path.of("..data", "tls.crt"));
+        Files.createSymbolicLink(secretDirectory.resolve("tls.key"), Path.of("..data", "tls.key"));
+
+        KeyStore keyStore = KubernetesTlsKeyStoreLoader.load(secretDirectory);
+
+        assertKeyEntry(keyStore, "tls", material);
+    }
+
+    @Test
     public void testMissingSecretDirectoryRetainsResolvedCertificatePath() throws Exception {
         Path secretDirectory = temporaryFolder.getRoot().toPath().resolve("missing-directory");
         Path certificatePath = secretDirectory.resolve("tls.crt");

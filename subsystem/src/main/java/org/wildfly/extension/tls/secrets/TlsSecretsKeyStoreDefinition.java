@@ -7,12 +7,17 @@ package org.wildfly.extension.tls.secrets;
 
 import static org.wildfly.extension.tls.secrets.TlsSecretsCapabilities.KEY_STORE_RUNTIME_CAPABILITY;
 
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.AbstractWriteAttributeHandler.HandbackHolder;
 import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.CapabilityServiceBuilder;
 import org.jboss.as.controller.OperationContext;
@@ -110,6 +115,24 @@ final class TlsSecretsKeyStoreDefinition extends PersistentResourceDefinition {
 
         private KeyStoreWriteAttributeHandler() {
             super(KEY_STORE);
+        }
+
+        @Override
+        protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
+                ModelNode resolvedValue, ModelNode currentValue, HandbackHolder<ModelNode> handbackHolder)
+                throws OperationFailedException {
+            ModelNode model = context.readResource(PathAddress.EMPTY_ADDRESS).getModel();
+            String name = context.getCurrentAddressValue();
+            String secretPath = SECRET_PATH.resolveModelAttribute(context, model).asString();
+            String alias = ALIAS.resolveModelAttribute(context, model).asString();
+            try {
+                KubernetesTlsKeyStoreLoader.load(Path.of(secretPath), alias);
+            } catch (GeneralSecurityException | IOException | InvalidPathException e) {
+                throw new OperationFailedException(String.format(
+                        "Unable to start Kubernetes TLS KeyStore \"%s\" from \"%s\"", name, secretPath), e);
+            }
+            return super.applyUpdateToRuntime(context, operation, attributeName, resolvedValue, currentValue,
+                    handbackHolder);
         }
 
         @Override

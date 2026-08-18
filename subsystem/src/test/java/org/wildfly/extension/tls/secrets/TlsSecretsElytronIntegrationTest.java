@@ -82,20 +82,34 @@ public class TlsSecretsElytronIntegrationTest extends AbstractSubsystemBaseTest 
 
     @Test
     public void testSelfSignedCertificateWorksWithElytronSslContext() throws Exception {
-        assertTlsHandshake(KubernetesTlsTestMaterial.createSelfSigned("Self Signed"), false);
+        assertTlsHandshake(KubernetesTlsTestMaterial.createSelfSigned("Self Signed"), false, null);
     }
 
     @Test
     public void testCaIssuedCertificateChainWorksWithElytronSslContext() throws Exception {
-        assertTlsHandshake(KubernetesTlsTestMaterial.create("CA Chain"), true);
+        assertTlsHandshake(KubernetesTlsTestMaterial.create("CA Chain"), true, null);
     }
 
-    private void assertTlsHandshake(KubernetesTlsTestMaterial material, boolean expectCaCertificate) throws Exception {
+    @Test
+    public void testEcPrivateKeyWorksWithElytronSslContext() throws Exception {
+        assertTlsHandshake(KubernetesTlsTestMaterial.createEc("EC Identity"), true, null);
+    }
+
+    @Test
+    public void testExplicitAliasWorksWithElytronSslContext() throws Exception {
+        assertTlsHandshake(KubernetesTlsTestMaterial.create("Explicit Alias"), true, "server-identity");
+    }
+
+    private void assertTlsHandshake(KubernetesTlsTestMaterial material, boolean expectCaCertificate, String alias)
+            throws Exception {
         Path secretDirectory = material.writeTo(temporaryFolder.newFolder().toPath());
         ModelNode addTlsSecrets = Util.createAddOperation(TLS_SECRETS_SUBSYSTEM);
         ModelNode addElytron = Util.createAddOperation(ELYTRON_SUBSYSTEM);
         ModelNode addKeyStore = Util.createAddOperation(TLS_SECRETS_SUBSYSTEM.append("key-store", RESOURCE_NAME));
         addKeyStore.get("path").set(secretDirectory.toString());
+        if (alias != null) {
+            addKeyStore.get("alias").set(alias);
+        }
         ModelNode addFilteringKeyStore = Util.createAddOperation(ELYTRON_SUBSYSTEM.append("filtering-key-store",
                 FILTERING_KEY_STORE_NAME));
         addFilteringKeyStore.get("key-store").set(RESOURCE_NAME);

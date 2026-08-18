@@ -38,6 +38,15 @@ final class KubernetesTlsTestMaterial {
     }
 
     static KubernetesTlsTestMaterial create(String commonName) throws Exception {
+        return create(commonName, "RSA", 2048);
+    }
+
+    static KubernetesTlsTestMaterial createEc(String commonName) throws Exception {
+        return create(commonName, "EC", 256);
+    }
+
+    private static KubernetesTlsTestMaterial create(String commonName, String keyAlgorithm, int keySize)
+            throws Exception {
         SelfSignedX509CertificateAndSigningKey ca = SelfSignedX509CertificateAndSigningKey.builder()
                 .setDn(new X500Principal("CN=Test CA " + commonName))
                 .setKeyAlgorithmName("RSA")
@@ -46,8 +55,8 @@ final class KubernetesTlsTestMaterial {
                 .addExtension(false, "BasicConstraints", "CA:true,pathlen:2147483647")
                 .build();
 
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyAlgorithm);
+        keyPairGenerator.initialize(keySize);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         X509Certificate certificate = new X509CertificateBuilder()
                 .setIssuerDn(ca.getSelfSignedCertificate().getSubjectX500Principal())

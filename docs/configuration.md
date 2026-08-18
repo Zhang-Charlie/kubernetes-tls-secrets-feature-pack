@@ -12,8 +12,9 @@ Each KeyStore resource points to one directory with this exact layout:
 
 `tls.crt` contains one or more PEM X.509 certificates. Put the leaf certificate
 first, followed by its issuer certificates in chain order. `tls.key` contains
-the matching PEM private key. The service rejects missing, malformed, or
-mismatched material during startup and does not publish a partial KeyStore.
+the matching unencrypted PEM private key. Encrypted private-key blocks are not
+currently supported. The service rejects missing, malformed, or mismatched
+material during startup and does not publish a partial KeyStore.
 
 ## Management model
 
@@ -118,9 +119,11 @@ KeyStore resource, the secret directory, and the certificate or key path that
 failed.
 
 Writing `path` or `alias` with resource-service restart allowed recreates only
-that KeyStore service. Removing the management resource removes its capability.
-Changes made directly to `tls.crt` or `tls.key` are not detected automatically;
-restart the server or pod after mounted Secret content changes.
+that KeyStore service. An invalid replacement is rejected before the working
+service is removed, so the previous model and KeyStore remain active. Removing
+the management resource removes its capability. Changes made directly to
+`tls.crt` or `tls.key` are not detected automatically; restart the server or pod
+after mounted Secret content changes.
 
 The underlying Elytron implementation is a read-only KeyStore type named
 `PEM`. Official WildFly Elytron user-guide changes are intentionally deferred

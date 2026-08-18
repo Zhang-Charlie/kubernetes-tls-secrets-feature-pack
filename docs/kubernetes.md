@@ -3,7 +3,7 @@
 ## Create the TLS Secret
 
 Create a `kubernetes.io/tls` Secret from a PEM certificate chain and its
-matching private key:
+matching unencrypted private key:
 
 ```bash
 kubectl create secret tls server-tls \

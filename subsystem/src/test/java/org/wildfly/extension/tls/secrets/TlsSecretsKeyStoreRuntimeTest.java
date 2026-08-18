@@ -141,6 +141,29 @@ public class TlsSecretsKeyStoreRuntimeTest extends AbstractSubsystemBaseTest {
     }
 
     @Test
+    public void testFailedPathUpdateRestoresPreviousServiceAndModel() throws Exception {
+        KubernetesTlsTestMaterial material = KubernetesTlsTestMaterial.create("Rollback");
+        Path secretDirectory = material.writeTo(temporaryFolder.newFolder("rollback-valid").toPath());
+        Path missingDirectory = temporaryFolder.getRoot().toPath().resolve("rollback-missing");
+        services = createRuntimeServices();
+        assertSuccessful(addKeyStore("rollback", secretDirectory.toString(), null));
+        assertKeyEntry(getKeyStore("rollback"), "tls", material);
+
+        ModelNode writePath = Util.getWriteAttributeOperation(keyStoreAddress("rollback"),
+                TlsSecretsKeyStoreDefinition.SECRET_PATH.getName(), new ModelNode(missingDirectory.toString()));
+        allowResourceServiceRestart(writePath);
+        ModelNode response = services.executeOperation(writePath);
+
+        assertEquals(response.toString(), FAILED, response.get(OUTCOME).asString());
+        assertKeyEntry(getKeyStore("rollback"), "tls", material);
+        ModelNode readPath = Util.getReadAttributeOperation(keyStoreAddress("rollback"),
+                TlsSecretsKeyStoreDefinition.SECRET_PATH.getName());
+        ModelNode readResponse = services.executeOperation(readPath);
+        assertSuccessful(readResponse);
+        assertEquals(secretDirectory.toString(), readResponse.get("result").asString());
+    }
+
+    @Test
     public void testFailedServiceStartRollsBackResourceAndCapability() throws Exception {
         Path missingDirectory = temporaryFolder.getRoot().toPath().resolve("missing-runtime-secret");
         services = createRuntimeServices();
