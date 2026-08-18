@@ -19,6 +19,7 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -57,13 +58,45 @@ public class KubernetesTlsKeyStoreLoaderTest {
         Path secretDirectory = createDirectory("projected-volume");
         Path versionDirectory = Files.createDirectory(secretDirectory.resolve("..2026_08_18_09_00_00"));
         material.writeTo(versionDirectory);
-        Files.createSymbolicLink(secretDirectory.resolve("..data"), versionDirectory.getFileName());
-        Files.createSymbolicLink(secretDirectory.resolve("tls.crt"), Path.of("..data", "tls.crt"));
-        Files.createSymbolicLink(secretDirectory.resolve("tls.key"), Path.of("..data", "tls.key"));
+        try {
+            Files.createSymbolicLink(secretDirectory.resolve("..data"), versionDirectory.getFileName());
+            Files.createSymbolicLink(secretDirectory.resolve("tls.crt"), Path.of("..data", "tls.crt"));
+            Files.createSymbolicLink(secretDirectory.resolve("tls.key"), Path.of("..data", "tls.key"));
+        } catch (IOException | UnsupportedOperationException e) {
+            Assume.assumeNoException("Symbolic links are not supported by this test environment", e);
+        }
 
         KeyStore keyStore = KubernetesTlsKeyStoreLoader.load(secretDirectory);
 
         assertKeyEntry(keyStore, "tls", material);
+    }
+
+    @Test
+    public void testLoadAbsoluteAndRelativeDirectoryPathsContainingSpaces() throws Exception {
+        KubernetesTlsTestMaterial material = createKubernetesTlsMaterial("PathForms");
+        Path absoluteDirectory = createSecretDirectory("secret directory with spaces", material).toAbsolutePath();
+        Path workingDirectory = Path.of("").toAbsolutePath();
+        Path relativeDirectory = workingDirectory.relativize(absoluteDirectory);
+
+        assertKeyEntry(KubernetesTlsKeyStoreLoader.load(absoluteDirectory), "tls", material);
+        assertKeyEntry(KubernetesTlsKeyStoreLoader.load(relativeDirectory), "tls", material);
+    }
+
+    @Test
+    public void testEncryptedPrivateKeyRetainsPathAndUnsupportedCause() throws Exception {
+        KubernetesTlsTestMaterial material = createKubernetesTlsMaterial("EncryptedPrivateKey");
+        Path secretDirectory = createSecretDirectory("encrypted-private-key", material);
+        Path privateKeyPath = secretDirectory.resolve("tls.key");
+        String encryptedLabel = new String(material.tlsKey, StandardCharsets.US_ASCII)
+                .replace("PRIVATE KEY", "ENCRYPTED PRIVATE KEY");
+        Files.write(privateKeyPath, encryptedLabel.getBytes(StandardCharsets.US_ASCII));
+
+        IOException exception = assertThrows(IOException.class,
+                () -> KubernetesTlsKeyStoreLoader.load(secretDirectory));
+
+        assertEquals("Unable to load PEM private key file \"" + privateKeyPath + "\"", exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertEquals("Encrypted PEM private keys are not supported", exception.getCause().getMessage());
     }
 
     @Test

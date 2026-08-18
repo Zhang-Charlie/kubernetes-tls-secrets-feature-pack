@@ -38,3 +38,4 @@ replacement Elytron JARs into an existing WildFly installation.
 - [Subsystem and Elytron configuration](docs/configuration.md)
 - [Kubernetes deployment](docs/kubernetes.md)
 - [Week 9 stretch-goal evaluation](docs/week9-stretch-goals.md)
+- [Development and verification](docs/development.md)
