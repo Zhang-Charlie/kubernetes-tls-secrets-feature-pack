@@ -25,7 +25,7 @@ import org.junit.rules.TemporaryFolder;
 
 public class KubernetesTlsKeyStoreLoaderTest {
 
-    private static final char[] EMPTY_PASSWORD = new char[0];
+    private static final char[] KEY_PASSWORD = KubernetesTlsKeyStoreLoader.KEY_PASSWORD.toCharArray();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -137,7 +137,7 @@ public class KubernetesTlsKeyStoreLoaderTest {
     private void assertKeyEntry(KeyStore keyStore, String alias, KubernetesTlsTestMaterial material) throws Exception {
         assertEquals(1, keyStore.size());
         assertTrue(keyStore.containsAlias(alias));
-        assertArrayEquals(material.keyPair.getPrivate().getEncoded(), keyStore.getKey(alias, EMPTY_PASSWORD).getEncoded());
+        assertArrayEquals(material.keyPair.getPrivate().getEncoded(), keyStore.getKey(alias, KEY_PASSWORD).getEncoded());
         Certificate[] chain = keyStore.getCertificateChain(alias);
         assertEquals(2, chain.length);
         assertEquals(material.certificate, chain[0]);

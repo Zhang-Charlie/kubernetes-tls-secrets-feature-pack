@@ -42,7 +42,7 @@ import org.junit.rules.TemporaryFolder;
 
 public class TlsSecretsKeyStoreRuntimeTest extends AbstractSubsystemBaseTest {
 
-    private static final char[] EMPTY_PASSWORD = new char[0];
+    private static final char[] KEY_PASSWORD = KubernetesTlsKeyStoreLoader.KEY_PASSWORD.toCharArray();
     private static final String EMPTY_SUBSYSTEM = "<subsystem xmlns=\"" + SubsystemParser_1_0.NAMESPACE + "\"/>";
     private static final PathAddress SUBSYSTEM_ADDRESS = PathAddress.pathAddress(SUBSYSTEM,
             TlsSecretsExtension.SUBSYSTEM_NAME);
@@ -233,7 +233,7 @@ public class TlsSecretsKeyStoreRuntimeTest extends AbstractSubsystemBaseTest {
         assertEquals(1, keyStore.size());
         assertTrue(keyStore.containsAlias(alias));
         assertArrayEquals(material.keyPair.getPrivate().getEncoded(),
-                keyStore.getKey(alias, EMPTY_PASSWORD).getEncoded());
+                keyStore.getKey(alias, KEY_PASSWORD).getEncoded());
         Certificate[] chain = keyStore.getCertificateChain(alias);
         assertEquals(2, chain.length);
         assertEquals(material.certificate, chain[0]);

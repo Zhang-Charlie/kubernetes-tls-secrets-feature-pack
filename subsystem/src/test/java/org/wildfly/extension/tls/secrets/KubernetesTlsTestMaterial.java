@@ -43,6 +43,7 @@ final class KubernetesTlsTestMaterial {
                 .setKeyAlgorithmName("RSA")
                 .setSignatureAlgorithmName("SHA256withRSA")
                 .setKeySize(2048)
+                .addExtension(false, "BasicConstraints", "CA:true,pathlen:2147483647")
                 .build();
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -64,6 +65,26 @@ final class KubernetesTlsTestMaterial {
         Pem.generatePemX509Certificate(tlsCrt, ca.getSelfSignedCertificate());
 
         return new KubernetesTlsTestMaterial(ca, keyPair, certificate, tlsKey.toArray(), tlsCrt.toArray());
+    }
+
+    static KubernetesTlsTestMaterial createSelfSigned(String commonName) {
+        SelfSignedX509CertificateAndSigningKey certificateAndKey = SelfSignedX509CertificateAndSigningKey.builder()
+                .setDn(new X500Principal("CN=Test " + commonName))
+                .setKeyAlgorithmName("RSA")
+                .setSignatureAlgorithmName("SHA256withRSA")
+                .setKeySize(2048)
+                .build();
+        X509Certificate certificate = certificateAndKey.getSelfSignedCertificate();
+        KeyPair keyPair = new KeyPair(certificate.getPublicKey(), certificateAndKey.getSigningKey());
+
+        ByteStringBuilder tlsKey = new ByteStringBuilder();
+        Pem.generatePemContent(tlsKey, "PRIVATE KEY", ByteIterator.ofBytes(keyPair.getPrivate().getEncoded()));
+
+        ByteStringBuilder tlsCrt = new ByteStringBuilder();
+        Pem.generatePemX509Certificate(tlsCrt, certificate);
+
+        return new KubernetesTlsTestMaterial(certificateAndKey, keyPair, certificate, tlsKey.toArray(),
+                tlsCrt.toArray());
     }
 
     Path writeTo(Path directory) throws IOException {

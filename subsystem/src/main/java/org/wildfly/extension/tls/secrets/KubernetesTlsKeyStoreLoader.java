@@ -18,6 +18,7 @@ final class KubernetesTlsKeyStoreLoader {
 
     private static final String CERTIFICATE_FILE_NAME = "tls.crt";
     private static final String PRIVATE_KEY_FILE_NAME = "tls.key";
+    static final String KEY_PASSWORD = "kubernetes-tls";
 
     private KubernetesTlsKeyStoreLoader() {
     }
@@ -31,7 +32,8 @@ final class KubernetesTlsKeyStoreLoader {
         Path certificatePath = secretDirectory.resolve(CERTIFICATE_FILE_NAME);
         Path privateKeyPath = secretDirectory.resolve(PRIVATE_KEY_FILE_NAME);
         KeyStore keyStore = KeyStore.getInstance("PEM", WildFlyElytronKeyStoreProvider.getInstance());
-        keyStore.load(new PemKeyStoreLoadParameter(certificatePath, privateKeyPath, alias));
+        KeyStore.PasswordProtection protection = new KeyStore.PasswordProtection(KEY_PASSWORD.toCharArray());
+        keyStore.load(new PemKeyStoreLoadParameter(certificatePath, privateKeyPath, alias, protection));
         return keyStore;
     }
 }
