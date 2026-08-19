@@ -17,7 +17,7 @@
     <packaging>pom</packaging>
 
     <name>WildFly Kubernetes TLS Secrets Feature Pack -- Parent</name>
-    <description>Galleon feature pack skeleton with an empty tls-secrets subsystem.</description>
+    <description>Galleon feature pack for loading mounted Kubernetes TLS secrets into Elytron.</description>
 
     <licenses>
         <license>
@@ -40,13 +40,28 @@
         <version.org.wildfly.licenses.plugin>2.4.2.Final</version.org.wildfly.licenses.plugin>
         <version.org.apache.maven.plugins.maven-assembly-plugin>3.7.1</version.org.apache.maven.plugins.maven-assembly-plugin>
 
-        <version.org.wildfly>39.0.0.Final</version.org.wildfly>
+        <version.org.wildfly>41.0.0.Final-SNAPSHOT</version.org.wildfly>
         <version.org.wildfly.common>1.6.0.Final</version.org.wildfly.common>
-        <version.org.wildfly.core>31.0.1.Final</version.org.wildfly.core>
+        <version.org.wildfly.core>33.0.0.Beta5-SNAPSHOT</version.org.wildfly.core>
+        <version.org.wildfly.elytron>2.10.0.CR1-SNAPSHOT</version.org.wildfly.elytron>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-elytron-bom-all</artifactId>
+                <version>${version.org.wildfly.elytron}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.core</groupId>
+                <artifactId>wildfly-core-parent</artifactId>
+                <version>${version.org.wildfly.core}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.wildfly</groupId>
                 <artifactId>wildfly-standard-ee-bom</artifactId>
@@ -63,6 +78,11 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>kubernetes-tls-secrets-subsystem</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-elytron-keystore</artifactId>
+                <version>${version.org.wildfly.elytron}</version>
             </dependency>
             <dependency>
                 <groupId>org.wildfly</groupId>
@@ -92,6 +112,29 @@
     </modules>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-wildfly-core-convergence</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <dependencyConvergence>
+                                    <includes>
+                                        <include>org.wildfly.core:*</include>
+                                    </includes>
+                                </dependencyConvergence>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>

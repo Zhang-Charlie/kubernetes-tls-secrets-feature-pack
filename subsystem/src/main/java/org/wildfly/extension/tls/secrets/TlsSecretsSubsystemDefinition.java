@@ -7,6 +7,7 @@ package org.wildfly.extension.tls.secrets;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.ModelOnlyAddStepHandler;
@@ -15,7 +16,7 @@ import org.jboss.as.controller.PersistentResourceDefinition;
 import org.jboss.as.controller.SimpleResourceDefinition;
 
 /**
- * Root resource definition for the {@code tls-secrets} subsystem (no attributes, no runtime).
+ * Root resource definition for the {@code tls-secrets} subsystem.
  */
 public class TlsSecretsSubsystemDefinition extends PersistentResourceDefinition {
 
@@ -30,5 +31,10 @@ public class TlsSecretsSubsystemDefinition extends PersistentResourceDefinition 
     @Override
     public Collection<AttributeDefinition> getAttributes() {
         return Collections.emptyList();
+    }
+
+    @Override
+    protected List<? extends PersistentResourceDefinition> getChildren() {
+        return List.of(new TlsSecretsKeyStoreDefinition());
     }
 }
